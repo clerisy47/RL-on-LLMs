@@ -1,5 +1,3 @@
-"""Population-based evolutionary optimizer."""
-
 from __future__ import annotations
 
 import json
@@ -17,8 +15,6 @@ from .settings import AppSettings, HyperParams, setup_logger
 
 
 class EvolutionaryPromptOptimizer:
-    """Evolutionary population optimizer with parent selection, crossover, and mutation."""
-
     def __init__(self, settings: AppSettings, hyperparams: HyperParams) -> None:
         self.settings = settings
         self.hyperparams = hyperparams
@@ -193,7 +189,6 @@ class EvolutionaryPromptOptimizer:
                 raise ValueError("LLM judge score missing.")
             reward = llm_value
         else:
-            # Human mode reward is assigned once per generation ranking.
             reward = 0.0
 
         responses = [response]
@@ -235,7 +230,6 @@ class EvolutionaryPromptOptimizer:
         return evaluations
 
     def _apply_human_generation_ranking(self, evaluations: list[CandidateEvaluation]) -> None:
-        """Assign rewards from one human ranking over all candidates in this generation."""
         items: list[tuple[str, str]] = []
         for idx, evaluation in enumerate(evaluations):
             params = evaluation.candidate.model_params
@@ -249,7 +243,6 @@ class EvolutionaryPromptOptimizer:
         self.apply_human_scores(evaluations, scores)
 
     def apply_human_scores(self, evaluations: list[CandidateEvaluation], scores: list[float]) -> None:
-        """Apply externally provided human scores to a generation."""
         if len(scores) != len(evaluations):
             raise ValueError("Human scores length must match number of generation candidates.")
 
@@ -263,12 +256,10 @@ class EvolutionaryPromptOptimizer:
                 self.best_evaluation = evaluation
 
     def ensure_population_initialized(self) -> None:
-        """Initialize population once when empty."""
         if not self.population:
             self._initialize_population()
 
     def evaluate_generation(self, topic: str, reward_mode: str) -> list[CandidateEvaluation]:
-        """Evaluate current generation without evolving to next one."""
         self.ensure_population_initialized()
         return self._evaluate_population(topic=topic, reward_mode=reward_mode)
 
@@ -277,7 +268,6 @@ class EvolutionaryPromptOptimizer:
         generation_index: int,
         evaluations: list[CandidateEvaluation],
     ) -> CandidateEvaluation:
-        """Log winner and evolve population to the next generation."""
         ranked = sorted(evaluations, key=lambda item: item.reward, reverse=True)
         best = ranked[0]
 
@@ -296,7 +286,6 @@ class EvolutionaryPromptOptimizer:
         return best
 
     def build_result(self, topic: str, reward_mode: str, generations: int) -> dict[str, Any]:
-        """Build result payload and persist memory."""
         self._persist_memory()
 
         if self.best_evaluation is None:
@@ -376,7 +365,6 @@ class EvolutionaryPromptOptimizer:
         reward_mode: str,
         generations: Optional[int] = None,
     ) -> dict[str, Any]:
-        """Run evolutionary optimization over multiple generations."""
         total_generations = generations or self.hyperparams.generations
         self.ensure_population_initialized()
 

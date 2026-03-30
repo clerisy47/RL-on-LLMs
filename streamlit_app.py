@@ -1,5 +1,3 @@
-"""Streamlit UI for evolutionary population-based prompt optimization."""
-
 from __future__ import annotations
 
 import streamlit as st
@@ -8,7 +6,6 @@ from rl_prompt_opt import AppSettings, EvolutionaryPromptOptimizer, load_hyperpa
 
 
 def _show_generation_error(exc: Exception) -> None:
-    """Render user-friendly error guidance for generation failures."""
     message = str(exc)
     st.error(message)
     if "RESOURCE_EXHAUSTED" in message or "quota" in message.lower() or "429" in message:
@@ -19,14 +16,12 @@ def _show_generation_error(exc: Exception) -> None:
 
 
 def _reset_human_session() -> None:
-    """Clear Streamlit human-session state keys."""
     for key in list(st.session_state.keys()):
         if key.startswith("human_"):
             del st.session_state[key]
 
 
 def _start_human_session(topic: str, generations: int, population_size: int) -> None:
-    """Initialize optimizer and first generation for in-website human ranking."""
     settings = AppSettings.from_env()
     hyperparams = load_hyperparams("hyperparams.json")
     hyperparams.generations = int(generations)
@@ -45,7 +40,6 @@ def _start_human_session(topic: str, generations: int, population_size: int) -> 
 
 
 def _parse_generation_ranking(raw: str, candidate_count: int) -> list[float]:
-    """Parse ranking input like '2 1 4 3' into per-candidate scores."""
     ranking = [int(token) - 1 for token in raw.split()]
     if sorted(ranking) != list(range(candidate_count)):
         raise ValueError("Ranking must contain each candidate index exactly once.")
@@ -59,7 +53,6 @@ def _parse_generation_ranking(raw: str, candidate_count: int) -> list[float]:
 
 
 def main() -> None:
-    """Render and run evolutionary population optimization in Streamlit."""
     st.set_page_config(page_title="RL Prompt Optimizer", layout="wide")
     st.title("Evolutionary Prompt Optimizer")
     st.caption("Population -> selection -> crossover -> mutation -> evaluate only new candidates")

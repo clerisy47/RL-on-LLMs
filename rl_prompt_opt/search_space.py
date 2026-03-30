@@ -1,5 +1,3 @@
-"""Prompt and model parameter search spaces."""
-
 from __future__ import annotations
 
 from typing import Any

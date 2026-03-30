@@ -1,5 +1,3 @@
-"""Gemini client wrapper with key failover and response sampling."""
-
 from __future__ import annotations
 
 import asyncio
@@ -35,8 +33,6 @@ def _extract_text(response: object) -> str:
 
 
 class GeminiClient:
-    """Thin generation/scoring wrapper with API-key failover."""
-
     def __init__(
         self,
         api_keys: tuple[str, ...],
@@ -66,7 +62,6 @@ class GeminiClient:
         return sha256(payload).hexdigest()
 
     def generate(self, prompt: str, temperature: float, top_p: float, use_cache: bool = True) -> str:
-        """Generate one response using failover across available keys."""
         cfg = {"temperature": temperature, "top_p": top_p}
         cache_enabled = self.enable_cache and use_cache
         key = self._cache_key(prompt, cfg)
@@ -94,7 +89,7 @@ class GeminiClient:
                     self.cache[key] = text
                 self.active_key_index = key_index
                 return text
-            except Exception as exc:  # pragma: no cover
+            except Exception as exc:
                 last_error = exc
                 if attempt >= total_attempts:
                     break
@@ -120,7 +115,6 @@ class GeminiClient:
         return await asyncio.gather(*tasks)
 
     def score_with_llm_judge(self, topic: str, response: str) -> float:
-        """Score a response on a 0-10 scale using Gemini as judge."""
         judge_prompt = (
             "You are an evaluator. Score the candidate answer from 0 to 10. "
             "Return only a number with optional decimal.\n\n"
@@ -132,7 +126,6 @@ class GeminiClient:
         try:
             value = float(cleaned)
         except ValueError:
-            # Fallback if judge output is verbose.
             import re
 
             match = re.search(r"(\d+(?:\.\d+)?)", raw)

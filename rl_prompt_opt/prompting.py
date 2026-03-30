@@ -1,12 +1,9 @@
-"""Prompt synthesis from parameter combinations."""
-
 from __future__ import annotations
 
 from typing import Any
 
 
 def build_prompt(topic: str, params: dict[str, Any]) -> str:
-    """Construct a concrete prompt from prompt-parameter assignments."""
     role = params.get("role", "teacher")
     audience = params.get("audience", "student")
     style = params.get("style", "conversational")

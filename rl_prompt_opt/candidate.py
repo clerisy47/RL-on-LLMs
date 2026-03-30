@@ -1,5 +1,3 @@
-"""Candidate and evaluation models for evolutionary optimization."""
-
 from __future__ import annotations
 
 import json
@@ -10,8 +8,6 @@ from typing import Any
 
 @dataclass(slots=True)
 class Candidate:
-    """A single candidate in the population."""
-
     prompt_params: dict[str, Any]
     model_params: dict[str, Any]
     signature: str = field(init=False)
@@ -22,8 +18,6 @@ class Candidate:
 
 @dataclass(slots=True)
 class CandidateEvaluation:
-    """Evaluation outputs attached to a candidate."""
-
     candidate: Candidate
     prompt: str
     responses: list[str]
@@ -37,7 +31,6 @@ class CandidateEvaluation:
 
 
 def candidate_signature(prompt_params: dict[str, Any], model_params: dict[str, Any]) -> str:
-    """Stable hash for candidate deduplication and evaluation caching."""
     payload = {
         "prompt_params": prompt_params,
         "model_params": model_params,

@@ -1,12 +1,9 @@
-"""Reward computation primitives."""
-
 from __future__ import annotations
 
 import re
 
 
 def heuristic_reward(response: str) -> float:
-    """Score response quality using light text heuristics in range [0, 10]."""
     text = response.strip()
     if not text:
         return 0.0
@@ -40,5 +37,4 @@ def heuristic_reward(response: str) -> float:
 
 
 def argmax(values: list[float]) -> int:
-    """Index of max value (stable on ties)."""
     return max(range(len(values)), key=lambda idx: values[idx])

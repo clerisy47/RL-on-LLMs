@@ -1,5 +1,3 @@
-"""CLI entry point for evolutionary population-based prompt optimization."""
-
 from __future__ import annotations
 
 import argparse
@@ -12,7 +10,6 @@ REWARD_MODES = ("heuristics", "human", "llm_judge")
 
 
 def build_parser() -> argparse.ArgumentParser:
-    """Build command-line argument parser."""
     parser = argparse.ArgumentParser(
         description="Evolutionary population-based prompt optimization for Gemini APIs"
     )
@@ -38,7 +35,6 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def choose_reward_mode(provided_mode: str | None) -> str:
-    """Ask at startup which reward mode to use unless already provided."""
     if provided_mode in REWARD_MODES:
         return provided_mode
 
@@ -53,7 +49,6 @@ def choose_reward_mode(provided_mode: str | None) -> str:
 
 
 def main() -> None:
-    """Run the optimizer from command line."""
     args = build_parser().parse_args()
     reward_mode = choose_reward_mode(args.reward_mode)
 

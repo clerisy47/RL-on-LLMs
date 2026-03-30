@@ -1,5 +1,3 @@
-"""Application settings and hyperparameters."""
-
 from __future__ import annotations
 
 import json
@@ -13,8 +11,6 @@ from dotenv import load_dotenv
 
 @dataclass(slots=True)
 class AppSettings:
-    """Runtime app settings loaded from environment variables."""
-
     gemini_api_keys: tuple[str, ...]
     gemini_model: str = "gemini-2.5-flash"
     memory_path: str = "data/memory.json"
@@ -42,8 +38,6 @@ class AppSettings:
 
 @dataclass(slots=True)
 class HyperParams:
-    """Evolution algorithm hyperparameters."""
-
     generations: int = 5
     population_size: int = 8
     parent_fraction: float = 0.4
@@ -70,7 +64,6 @@ class HyperParams:
 
 
 def load_hyperparams(path: str = "hyperparams.json") -> HyperParams:
-    """Load hyperparameters from JSON, fallback to defaults."""
     file_path = Path(path)
     if not file_path.exists():
         return HyperParams()
@@ -81,7 +74,6 @@ def load_hyperparams(path: str = "hyperparams.json") -> HyperParams:
 
 
 def setup_logger(log_path: str) -> logging.Logger:
-    """Configure logger once."""
     path = Path(log_path)
     path.parent.mkdir(parents=True, exist_ok=True)
 
