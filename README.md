@@ -1,28 +1,45 @@
-# RL Prompt Optimization System (Gemini + RLHF-style)
+# Evolutionary Prompt Optimization (Gemini)
 
-Production-quality Python project for black-box prompt optimization over Gemini APIs using:
+Population-based prompt optimization over Gemini with a clean package structure.
 
-- epsilon-greedy parameter bandits
-- mutation-based exploration (Evolution Strategy)
-- configurable rewards (heuristics, human feedback, or both)
-- mixed optimization over prompt + model generation parameters
-- persistent memory and retrieval of successful settings
-- CLI and Streamlit interfaces
+## Algorithm
 
-## Project Structure
+Each generation follows:
 
-- `config.py`
-- `prompt_generator.py`
-- `gemini_client.py`
-- `reward.py`
-- `human_feedback.py`
-- `bandit.py`
-- `evolution.py`
-- `memory.py`
-- `optimizer.py`
-- `main.py`
-- `streamlit_app.py`
+1. Maintain a population of candidates.
+2. Candidate = prompt parameter combination + model parameter combination.
+3. Evaluate only candidates not already in cache/memory.
+4. Rank by reward and select stronger parents.
+5. Randomly eliminate weaker candidates.
+6. Create children with crossover.
+7. Apply random mutation.
+8. Repeat for next generation.
+
+In `human` mode, you provide exactly one ranking per generation across all candidates.
+
+Reward modes:
+
+- `heuristics`
+- `human`
+- `llm_judge`
+
+## Folder Structure
+
+- `rl_prompt_opt/`
+	- `__init__.py`
+	- `settings.py`
+	- `search_space.py`
+	- `candidate.py`
+	- `prompting.py`
+	- `feedback.py`
+	- `rewards.py`
+	- `gemini.py`
+	- `engine.py`
+- `main.py` (CLI entrypoint)
+- `streamlit_app.py` (Streamlit entrypoint)
 - `hyperparams.json`
+- `data/memory.json`
+- `logs/optimizer.log`
 
 ## Setup
 
@@ -55,7 +72,7 @@ LOG_PATH=logs/optimizer.log
 ```
 
 Multiple keys are supported by setting `GEMINI_API_KEY` as comma-separated values.
-The optimizer uses one key per iteration and rotates via modulo indexing.
+The engine automatically fails over to the next key on API errors.
 
 Example:
 
@@ -75,31 +92,26 @@ At startup, the CLI asks which reward mode to use:
 
 - `heuristics`
 - `human`
-- `both`
+- `llm_judge`
 
 Optional flags:
 
-- `--iterations 10`
-- `--samples 3`
-- `--feedback-mode cli`
+- `--generations 10`
 - `--hyperparams hyperparams.json`
-- `--reward-mode heuristics|human|both`
+- `--reward-mode heuristics|human|llm_judge`
 
-Default optimization iterations: 5.
+Default generations: 5.
 
-Model generation parameters are included in the optimizer mixer and learned jointly:
+Model parameters in the search space:
 
 ```python
 MODEL_PARAMS = {
-	"temperature": [0.2, 0.5, 0.7, 1.0],
-	"top_p": [0.7, 0.9, 1.0],
-	"presence_penalty": [0.0, 0.5, 1.0],
-	"frequency_penalty": [0.0, 0.5, 1.0],
-	"max_tokens": [64, 128, 256, 512],
+    "temperature": [0.2, 0.5, 0.7, 1.0],
+    "top_p": [0.7, 0.9, 1.0],
 }
 ```
 
-## Streamlit Human Interface
+## Streamlit
 
 After activating your virtual environment:
 
@@ -108,16 +120,18 @@ source venv/bin/activate
 streamlit run streamlit_app.py
 ```
 
-The app shows multiple responses side-by-side and supports:
+The app runs the same evolutionary engine with generation/population controls.
 
-- best-response selection
-- full ranking
-- pairwise preferences
-- full interactive optimization loop with CLI-equivalent controls (topic, iterations, samples, reward mode)
-- automatic run mode for non-human reward workflows
+In Streamlit `human` mode, start a human session and provide one generation-level ranking per generation across all candidates.
+
+Hyperparameter knobs for reproduction in `hyperparams.json`:
+
+- `parent_fraction`: top candidates prioritized as parents.
+- `elimination_fraction`: weakest candidates prioritized for elimination.
+- `crossover_fraction`: portion of population replaced by crossover children.
+- `mutation_fraction`: portion of population replaced by mutated variants.
 
 ## Notes
 
-- Human feedback is treated as primary when provided.
-- Memory is persisted in `data/memory.json`.
-- Training and iteration logs are saved in `logs/optimizer.log`.
+- Memory is persisted in `data/memory.json` and reused to avoid re-evaluating known candidates.
+- Generation logs are written to `logs/optimizer.log`.

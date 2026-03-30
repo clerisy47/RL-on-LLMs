@@ -1,9 +1,11 @@
 {
-  "iterations": 5,
-  "num_samples": 3,
-  "epsilon": 0.25,
+  "generations": 5,
+  "population_size": 8,
+  "parent_fraction": 0.4,
+  "elimination_fraction": 0.5,
+  "crossover_fraction": 0.3,
+  "mutation_fraction": 0.2,
   "mutation_rate": 0.25,
-  "temperature": 0.9,
   "max_retries": 3,
   "retry_backoff_seconds": 1.0
 }
