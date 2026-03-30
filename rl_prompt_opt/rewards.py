@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from collections import Counter
 
 
 def heuristic_reward(response: str) -> float:
@@ -30,9 +31,19 @@ def heuristic_reward(response: str) -> float:
 
     lowered = [word.lower() for word in words]
     unique_ratio = len(set(lowered)) / max(1, len(lowered))
-    repetition = 10.0 * unique_ratio
+    diversity = 10.0 * unique_ratio
 
-    score = (0.4 * conciseness) + (0.3 * structure) + (0.3 * repetition)
+    counts = Counter(lowered)
+    repeated_tokens = sum(max(0, count - 1) for count in counts.values())
+    repetition_ratio = repeated_tokens / max(1, len(lowered))
+    non_repetition = 10.0 * (1.0 - repetition_ratio)
+
+    score = (
+        (0.35 * conciseness)
+        + (0.25 * structure)
+        + (0.20 * diversity)
+        + (0.20 * non_repetition)
+    )
     return float(max(0.0, min(10.0, score)))
 
 
