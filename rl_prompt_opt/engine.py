@@ -153,6 +153,7 @@ class EvolutionaryPromptOptimizer:
         topic: str,
         candidate: Candidate,
         reward_mode: str,
+        llm_judge_criteria: str | None = None,
     ) -> CandidateEvaluation:
         if candidate.signature in self.eval_cache:
             return self.eval_cache[candidate.signature]
@@ -179,7 +180,7 @@ class EvolutionaryPromptOptimizer:
         llm_scores: Optional[list[float]] = None
         llm_value: Optional[float] = None
         if reward_mode == "llm_judge":
-            llm_value = self.client.score_with_llm_judge(topic, response)
+            llm_value = self.client.score_with_llm_judge(topic, response, llm_judge_criteria)
             llm_scores = [llm_value]
 
         if reward_mode == "heuristics":
@@ -217,6 +218,7 @@ class EvolutionaryPromptOptimizer:
         self,
         topic: str,
         reward_mode: str,
+        llm_judge_criteria: str | None = None,
     ) -> list[CandidateEvaluation]:
         evaluations: list[CandidateEvaluation] = []
         for candidate in self.population:
@@ -225,6 +227,7 @@ class EvolutionaryPromptOptimizer:
                     topic=topic,
                     candidate=candidate,
                     reward_mode=reward_mode,
+                    llm_judge_criteria=llm_judge_criteria,
                 )
             )
         return evaluations
@@ -259,9 +262,18 @@ class EvolutionaryPromptOptimizer:
         if not self.population:
             self._initialize_population()
 
-    def evaluate_generation(self, topic: str, reward_mode: str) -> list[CandidateEvaluation]:
+    def evaluate_generation(
+        self,
+        topic: str,
+        reward_mode: str,
+        llm_judge_criteria: str | None = None,
+    ) -> list[CandidateEvaluation]:
         self.ensure_population_initialized()
-        return self._evaluate_population(topic=topic, reward_mode=reward_mode)
+        return self._evaluate_population(
+            topic=topic,
+            reward_mode=reward_mode,
+            llm_judge_criteria=llm_judge_criteria,
+        )
 
     def complete_generation(
         self,
@@ -364,12 +376,17 @@ class EvolutionaryPromptOptimizer:
         topic: str,
         reward_mode: str,
         generations: Optional[int] = None,
+        llm_judge_criteria: str | None = None,
     ) -> dict[str, Any]:
         total_generations = generations or self.hyperparams.generations
         self.ensure_population_initialized()
 
         for generation in range(1, total_generations + 1):
-            evaluations = self.evaluate_generation(topic=topic, reward_mode=reward_mode)
+            evaluations = self.evaluate_generation(
+                topic=topic,
+                reward_mode=reward_mode,
+                llm_judge_criteria=llm_judge_criteria,
+            )
             if reward_mode == "human":
                 self._apply_human_generation_ranking(evaluations)
             self.complete_generation(generation_index=generation, evaluations=evaluations)

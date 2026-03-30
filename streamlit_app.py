@@ -72,6 +72,14 @@ def main() -> None:
         help="Human mode uses one ranking input per generation across all candidates.",
     )
 
+    llm_judge_criteria: str | None = None
+    if reward_mode == "llm_judge":
+        llm_judge_criteria = st.text_area(
+            "LLM Judge Criteria",
+            value="Correctness, clarity, completeness, and practical usefulness.",
+            help="Describe what the LLM judge should prioritize when scoring responses.",
+        ).strip()
+
     if reward_mode != "human" and st.button("Run Optimization"):
         try:
             settings = AppSettings.from_env()
@@ -84,6 +92,7 @@ def main() -> None:
                 topic=topic,
                 reward_mode=reward_mode,
                 generations=int(generations),
+                llm_judge_criteria=llm_judge_criteria,
             )
 
             st.success("Optimization complete.")

@@ -114,10 +114,12 @@ class GeminiClient:
         ]
         return await asyncio.gather(*tasks)
 
-    def score_with_llm_judge(self, topic: str, response: str) -> float:
+    def score_with_llm_judge(self, topic: str, response: str, criteria: str | None = None) -> float:
+        judge_basis = criteria.strip() if criteria and criteria.strip() else "overall quality"
         judge_prompt = (
             "You are an evaluator. Score the candidate answer from 0 to 10. "
             "Return only a number with optional decimal.\n\n"
+            f"Scoring criteria: {judge_basis}\n"
             f"Topic: {topic}\n"
             f"Candidate answer:\n{response}\n"
         )
